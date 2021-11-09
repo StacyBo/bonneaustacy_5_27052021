@@ -93,3 +93,4 @@ function addProductInLocalStorage(quantity, colorSelected, productsFromLocalStor
     };
     productsFromLocalStorage.push(newProduct);
 }
+

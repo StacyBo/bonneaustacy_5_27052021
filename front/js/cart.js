@@ -184,11 +184,11 @@ function updateTotals() {
 function postTheOrder() {
     const params = {
         contact: {
-            firstName: 'cyril',
-            lastName: 'abella',
-            address: 'aaa',
-            city: 'bbb',
-            email: 'cyril.abella@gmail.com'
+            firstName: 'Stacy',
+            lastName: 'Bonneau',
+            address: 'Rue du Molinel',
+            city: 'Lille',
+            email: 'bonneau.stacy@gmail.com'
         },
         products: ['107fb5b75607497b96722bda5b504926', '77711f0e466b4ddf953f677d30b0efc9']
     };
@@ -207,4 +207,54 @@ function postTheOrder() {
             console.error(error);
         })
         ;
+}
+
+function validateForm(contact) {
+    let firstNameErrorMsg = document.getElementById('firstNameErrorMsg');
+    let lastNameErrorMsg = document.getElementById('lastNameErrorMsg');
+    let addressErrorMsg = document.getElementById('addressErrorMsg');
+    let cityErrorMsg = document.getElementById('cityErrorMsg');
+    let emailErrorMsg = document.getElementById('emailErrorMsg');
+
+    let regexDefault = /^[a-zàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöü]+$/i;
+    // firstName
+    if (regexDefault.test(contact.firstName) === false) {
+        firstNameErrorMsg.textContent = 'Veuillez saisir un prénom';
+        return false;
+    } else {
+        firstNameErrorMsg.textContent = '';
+    }
+
+    // LastName
+    if (regexDefault.test(contact.lastName) === false) {
+        lastNameErrorMsg.textContent = 'Veuillez saisir un nom';
+        return false;
+    } else {
+        lastNameErrorMsg.textContent = '';
+    }
+
+    // Address
+    if (regexDefault.test(contact.address) === false) {
+        addressErrorMsg.textContent = 'Veuillez saisir une adresse';
+        return false;
+    } else {
+        addressErrorMsg.textContent = '';
+    }
+
+    // City
+    if (regexDefault.test(contact.city) === false) {
+        cityErrorMsg.textContent = 'Veuillez saisir une ville';
+        return false;
+    } else {
+        cityErrorMsg.textContent = '';
+    }
+
+    // Email
+    let regexEmail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9]+$/;
+    if (regexEmail.test(contact.email) === false) {
+        emailErrorMsg.textContent = 'Veuillez saisir une adresse Email valide';
+        return false;
+    } else {
+        emailErrorMsg.textContent = '';
+    }
 }
