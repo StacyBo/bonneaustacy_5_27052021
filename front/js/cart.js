@@ -4,36 +4,24 @@ let productsFromLocalStorage = localStorage.getItem('products');
 let productsFromStorage = JSON.parse(productsFromLocalStorage);
 
 let sectionCartItemsEl = document.getElementById('cart__items');
-// on récupère le modèle de l'article
-let cartItemPrototypeEl = document.querySelector('.cart__item');
+
 
 async function requests() {
     if (!productsFromStorage) {
         return;
     }
-    for (productFromStorage of productsFromStorage) {
+    for (let productFromStorage of productsFromStorage) {
         await fetch('http://localhost:3000/api/products/' + productFromStorage.productId)
             .then(function (response) {
                 return response.json();
             })
             .then(function (product) {
                 // Display the product
-                let cartItemEl = displayCartItem(product);
+                let cartItemEl = displayCartItem(product, productFromStorage);
 
                 // Check if the same product already exists with a different color
-                if (isAlreadyExistingProduct(product)) {
-                    // Display the color
-                    let cartItemColorEl = cartItemEl.querySelector('.cart_item_color');
-                    cartItemColorEl.textContent = 'Couleur : ' + productFromStorage.color;
-                    cartItemColorEl.style.display = 'block';
-
-                    // Display it just after the same product
-                    let sameProductEl = document.querySelector('.cart__item[data-id="' + productFromStorage.productId + '"]');
-                    if (sameProductEl) {
-                        sameProductEl.after(cartItemEl);
-                    } else {
-                        sectionCartItemsEl.appendChild(cartItemEl);
-                    }
+                if (isAlreadyExistingProduct(productFromStorage)) {
+                    groupSameProducts(cartItemEl, productFromStorage);
                 } else {
                     // It doesn't already exist, so display it normally at the end
                     sectionCartItemsEl.appendChild(cartItemEl);
@@ -41,7 +29,6 @@ async function requests() {
             });
     }
 }
-
 requests().then(function () {
     // One time all requests and elements added in the DOM
     updateTotals();
@@ -70,11 +57,13 @@ requests().then(function () {
     });
 });
 
-function displayCartItem(product) {
+function displayCartItem(product, productFromStorage) {
     // Display cart item
+    // on récupère le modèle de l'article
+    let cartItemPrototypeEl = document.querySelector('.cart__item');
     let cartItemEl = cartItemPrototypeEl.cloneNode(true);
     cartItemEl.style.display = 'flex';
-    cartItemEl.dataset.productId = product._id;
+    cartItemEl.dataset.id = productFromStorage.productId;
 
     // Display Image
     let imgEl = cartItemEl.querySelector('img');
@@ -101,9 +90,9 @@ function displayCartItem(product) {
     return cartItemEl;
 }
 
-function isAlreadyExistingProduct(product) {
+function isAlreadyExistingProduct(productFromStorage) {
     let exists = false;
-    for (product of productsFromStorage) {
+    for (let product of productsFromStorage) {
         if (product.productId === productFromStorage.productId && product.color !== productFromStorage.color) {
             exists = true;
         }
@@ -150,7 +139,7 @@ function updateProductPrice(quantityEl) {
 
 function updateQuantityInLocalStorage(cartItemEl, quantity) {
     // Find the product and update the quantity
-    for (productFromStorage of productsFromStorage) {
+    for (let productFromStorage of productsFromStorage) {
         if (productFromStorage.productId === cartItemEl.dataset.id && productFromStorage.color === cartItemEl.dataset.color) {
             productFromStorage.quantity = quantity;
             break;
@@ -163,11 +152,11 @@ function updateQuantityInLocalStorage(cartItemEl, quantity) {
 }
 
 function updateTotals() {
-    // Display the totals
+// Display the totals
     let products = document.querySelectorAll('.cart__item');
     let totalArticle = 0;
     let totalPrice = 0;
-    for (product of products) {
+    for (let product of products) {
         if (product.dataset.price && product.dataset.quantity) {
             totalArticle += parseInt(product.dataset.quantity);
             totalPrice += parseInt(product.dataset.quantity) * parseInt(product.dataset.price);
@@ -181,32 +170,74 @@ function updateTotals() {
     totalPriceEl.textContent = totalPrice.toFixed(2);
 }
 
+function getProductIds() {
+    let productIds = [];
+    for (let product of productsFromStorage) {
+        productIds.push(product.productId);
+    }
+    return productIds;
+}
+
 function postTheOrder() {
+    let firstNameEl = document.getElementById('firstName');
+    let lastNameEl = document.getElementById('lastName');
+    let addressEl = document.getElementById('address');
+    let cityEl = document.getElementById('city');
+    let emailEl = document.getElementById('email');
+
+    let contact = {
+        firstName: firstNameEl.value,
+        lastName: lastNameEl.value,
+        address: addressEl.value,
+        city: cityEl.value,
+        email: emailEl.value
+    };
+
+    if (!validateForm(contact)) {
+        return;
+    }
+
+    let productsIds = getProductIds();
+
+    if (productsIds.length < 1) {
+        return;
+    }
+
     const params = {
-        contact: {
-            firstName: 'Stacy',
-            lastName: 'Bonneau',
-            address: 'Rue du Molinel',
-            city: 'Lille',
-            email: 'bonneau.stacy@gmail.com'
-        },
-        products: ['107fb5b75607497b96722bda5b504926', '77711f0e466b4ddf953f677d30b0efc9']
+        contact: contact,
+        products: productsIds
     };
     fetch('http://localhost:3000/api/products/order', {
         method: 'POST',
         body: JSON.stringify(params),
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
     })
         .then(function (response) {
+            return response.json();
+        })
+        .then(function (product) {
+            // Clear the Local Storage
             localStorage.removeItem('products');
-            let orderId = response.orderId;
-            window.location.href = 'confirmation.html?orderId=' + orderId;
-
+            window.location.href = 'confirmation.html?orderId=' + product.orderId;
         })
         .catch((error) => {
             console.error(error);
-        })
-        ;
+        });
+}
+
+function groupSameProducts(cartItemEl, productFromStorage) {
+    // Display the color
+    let cartItemColorEl = cartItemEl.querySelector('.cart_item_color');
+    cartItemColorEl.textContent = 'Couleur : ' + productFromStorage.color;
+    cartItemColorEl.style.display = 'block';
+
+    // Display it just after the same product
+    let sameProductEl = document.querySelector('.cart__item[data-id="' + productFromStorage.productId + '"]');
+    if (sameProductEl) {
+        sameProductEl.after(cartItemEl);
+    } else {
+        sectionCartItemsEl.appendChild(cartItemEl);
+    }
 }
 
 function validateForm(contact) {
@@ -234,7 +265,8 @@ function validateForm(contact) {
     }
 
     // Address
-    if (regexDefault.test(contact.address) === false) {
+    let regexAddress = /^[0-9a-z\sàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöü]+$/i;
+    if (regexAddress.test(contact.address) === false) {
         addressErrorMsg.textContent = 'Veuillez saisir une adresse';
         return false;
     } else {
@@ -257,4 +289,6 @@ function validateForm(contact) {
     } else {
         emailErrorMsg.textContent = '';
     }
+    
+    return true;
 }

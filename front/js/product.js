@@ -7,46 +7,54 @@ fetch('http://localhost:3000/api/products/' + productId)
         return response.json();
     })
     .then(function (product) {
-        console.log(product)
-        // Display Product image
-        let img = document.createElement('img');
-        img.src = product.imageUrl;
-        img.alt = product.altTxt;
-        let itemImg = document.querySelector('.item__img');
-        itemImg.appendChild(img);
-
-        // Display Product title
-        let title = document.getElementById('title');
-        title.textContent = product.name;
-
-        // Display Product price
-        let price = document.getElementById('price');
-        price.textContent = product.price;
-
-        // Display Product description
-        let description = document.getElementById('description');
-        description.textContent = product.description;
-
-        // Display Product colors
-        let colors = document.getElementById('colors');
-        for (let color of product.colors) {
-            let option = document.createElement('option');
-            option.value = color;
-            option.textContent = color;
-            colors.appendChild(option);
-        }
+       displayProduct(product)
     });
+
+function displayProduct (product){
+     // Display Product image
+     let img = document.createElement('img');
+     img.src = product.imageUrl;
+     img.alt = product.altTxt;
+     let itemImg = document.querySelector('.item__img');
+     itemImg.appendChild(img);
+
+     // Display Product title
+     let title = document.getElementById('title');
+     title.textContent = product.name;
+
+     // Display Product price
+     let price = document.getElementById('price');
+     price.textContent = product.price;
+
+     // Display Product description
+     let description = document.getElementById('description');
+     description.textContent = product.description;
+
+     // Display Product colors
+     let colors = document.getElementById('colors');
+     for (let color of product.colors) {
+         let option = document.createElement('option');
+         option.value = color;
+         option.textContent = color;
+         colors.appendChild(option);
+     }
+}
 
 // Click on "add to cart" button
 const addToCartButton = document.getElementById('addToCart');
 
-addToCartButton.addEventListener('click', function () {
+addToCartButton.addEventListener('click', function() {
     let quantity = parseInt(document.getElementById('quantity').value);
+    if (quantity < 1) {
+        return;
+    }
     let colorSelected = document.getElementById('colors').value;
+    if (!colorSelected){
+        return;
+    } 
 
     // On récupère les produits enregistrés dans le local storage
     let productsFromLocalStorageJSON = localStorage.getItem('products');
-
     // On converti les produits qui sont de type "texte" en tableau pour pouvoir utiliser la fonction forEach ensuite par exemple
     let productsFromLocalStorage = JSON.parse(productsFromLocalStorageJSON);
 
@@ -62,6 +70,7 @@ addToCartButton.addEventListener('click', function () {
         }
     } else {
         // Si pas de produits dans le local storage, on l'ajoute
+        productsFromLocalStorage = [];
         addProductInLocalStorage(quantity, colorSelected, productsFromLocalStorage);
     }
 
@@ -93,4 +102,3 @@ function addProductInLocalStorage(quantity, colorSelected, productsFromLocalStor
     };
     productsFromLocalStorage.push(newProduct);
 }
-
