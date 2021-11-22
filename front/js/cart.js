@@ -16,24 +16,24 @@ async function requests() {
                 return response.json();
             })
             .then(function (product) {
-                // Display the product
+                // Afficher le produit
                 let cartItemEl = displayCartItem(product, productFromStorage);
 
-                // Check if the same product already exists with a different color
+                // Regarde si le même produit existe deja avec une couleur differente 
                 if (isAlreadyExistingProduct(productFromStorage)) {
                     groupSameProducts(cartItemEl, productFromStorage);
                 } else {
-                    // It doesn't already exist, so display it normally at the end
+                    // Il n'existe pas, il s'affiche normalement à la suite
                     sectionCartItemsEl.appendChild(cartItemEl);
                 }
             });
     }
 }
 requests().then(function () {
-    // One time all requests and elements added in the DOM
+    // Une fois toutes les requêtes et éléments ajoutés dans le DOM
     updateTotals();
 
-    // Quantity event
+    // Evenement quantité
     let quantityElements = document.querySelectorAll('.itemQuantity');
     quantityElements.forEach(quantityEl => {
         quantityEl.addEventListener('change', () => {
@@ -41,7 +41,7 @@ requests().then(function () {
         });
     });
 
-    // Delete event
+    // Evenement suppression
     let deleteButtonElements = document.querySelectorAll('.deleteItem');
     deleteButtonElements.forEach(deleteButtonEl => {
         deleteButtonEl.addEventListener('click', () => {
@@ -49,7 +49,7 @@ requests().then(function () {
         });
     });
 
-    // submit form event
+    // Evenement envoyer formulaire
     let form = document.querySelector('.cart__order__form');
     form.addEventListener('submit', (event) => {
         event.preventDefault(); // Empêche l'envoi automatique (par défaut) du formulaire
@@ -58,33 +58,33 @@ requests().then(function () {
 });
 
 function displayCartItem(product, productFromStorage) {
-    // Display cart item
+    // Afficher le produit
     // on récupère le modèle de l'article
     let cartItemPrototypeEl = document.querySelector('.cart__item');
     let cartItemEl = cartItemPrototypeEl.cloneNode(true);
     cartItemEl.style.display = 'flex';
     cartItemEl.dataset.id = productFromStorage.productId;
 
-    // Display Image
+    // Afficher l'image
     let imgEl = cartItemEl.querySelector('img');
     imgEl.src = product.imageUrl;
     imgEl.alt = product.altTxt;
 
-    // Display product name
+    // Afficher le nom du produit
     let productNameEl = cartItemEl.querySelector('.cart__item__content__titlePrice h2');
     productNameEl.textContent = product.name;
 
-    // Display quantity
+    // Afficher la quantité
     let quantityEl = cartItemEl.querySelector('.itemQuantity');
     quantityEl.value = productFromStorage.quantity;
     cartItemEl.dataset.quantity = productFromStorage.quantity;
 
-    // Display price
+    // Afficher le prix
     let priceEl = cartItemEl.querySelector('.cart_item_price');
     priceEl.textContent = (product.price * productFromStorage.quantity) + ' €';
     cartItemEl.dataset.price = product.price;
 
-    // Add color data
+    // Afficher les choix de couleurs
     cartItemEl.dataset.color = productFromStorage.color;
 
     return cartItemEl;
@@ -105,24 +105,24 @@ function deleteProduct(deleteButtonEl) {
 
     productsFromStorage.forEach(function (productFromStorage, index) {
         if (productFromStorage.productId === cartItemEl.dataset.id && productFromStorage.color === cartItemEl.dataset.color) {
-            // Delete the item
+            // Supprimer un produit
             productsFromStorage.splice(index, 1);
         }
     });
 
-    // Update the localStorage
+    // Mise à jour du Local Storage
     let productsUpdated = JSON.stringify(productsFromStorage);
     localStorage.setItem("products", productsUpdated);
 
-    // Remove the product from the DOM
+    // Supprimer le produit du DOM
     cartItemEl.remove();
 
-    // Update products total
+    // Mise à jour des totaux des produits
     updateTotals();
 }
 
 function updateProductPrice(quantityEl) {
-    // Update total product price
+    // Mise à jour des prix des produits 
     let cartItemEl = quantityEl.closest('.cart__item');
     let unitPrice = parseInt(cartItemEl.dataset.price);
     let cartItemPriceEl = cartItemEl.querySelector('.cart_item_price');
@@ -130,15 +130,15 @@ function updateProductPrice(quantityEl) {
     cartItemPriceEl.textContent = (unitPrice * quantity) + ' €';
     cartItemEl.dataset.quantity = quantity;
 
-    // Update products total
+    // Mise à jour du prix total 
     updateTotals();
 
-    // Update the local storage
+    // Mise à jour des quantités dans le Local Storage
     updateQuantityInLocalStorage(cartItemEl, quantity);
 }
 
 function updateQuantityInLocalStorage(cartItemEl, quantity) {
-    // Find the product and update the quantity
+    // Chercher si le produit est dans le Local Storage et ajuster les quantités
     for (let productFromStorage of productsFromStorage) {
         if (productFromStorage.productId === cartItemEl.dataset.id && productFromStorage.color === cartItemEl.dataset.color) {
             productFromStorage.quantity = quantity;
@@ -146,13 +146,13 @@ function updateQuantityInLocalStorage(cartItemEl, quantity) {
         }
     }
 
-    // Update the localStorage
+    // Mise à jour du Local Storage 
     let productsUpdated = JSON.stringify(productsFromStorage);
     localStorage.setItem("products", productsUpdated);
 }
 
 function updateTotals() {
-// Display the totals
+    // Afficher les totaux
     let products = document.querySelectorAll('.cart__item');
     let totalArticle = 0;
     let totalPrice = 0;
@@ -210,13 +210,13 @@ function postTheOrder() {
     fetch('http://localhost:3000/api/products/order', {
         method: 'POST',
         body: JSON.stringify(params),
-        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
     })
         .then(function (response) {
             return response.json();
         })
         .then(function (product) {
-            // Clear the Local Storage
+            // Remettre le Local Storage a zero
             localStorage.removeItem('products');
             window.location.href = 'confirmation.html?orderId=' + product.orderId;
         })
@@ -226,12 +226,12 @@ function postTheOrder() {
 }
 
 function groupSameProducts(cartItemEl, productFromStorage) {
-    // Display the color
+    // Afficher la couleur
     let cartItemColorEl = cartItemEl.querySelector('.cart_item_color');
     cartItemColorEl.textContent = 'Couleur : ' + productFromStorage.color;
     cartItemColorEl.style.display = 'block';
 
-    // Display it just after the same product
+    // Afficher apres la meme reference de produit 
     let sameProductEl = document.querySelector('.cart__item[data-id="' + productFromStorage.productId + '"]');
     if (sameProductEl) {
         sameProductEl.after(cartItemEl);
@@ -248,7 +248,7 @@ function validateForm(contact) {
     let emailErrorMsg = document.getElementById('emailErrorMsg');
 
     let regexDefault = /^[a-zàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöü]+$/i;
-    // firstName
+    // Prenom
     if (regexDefault.test(contact.firstName) === false) {
         firstNameErrorMsg.textContent = 'Veuillez saisir un prénom';
         return false;
@@ -256,7 +256,7 @@ function validateForm(contact) {
         firstNameErrorMsg.textContent = '';
     }
 
-    // LastName
+    // Nom de famille
     if (regexDefault.test(contact.lastName) === false) {
         lastNameErrorMsg.textContent = 'Veuillez saisir un nom';
         return false;
@@ -264,7 +264,7 @@ function validateForm(contact) {
         lastNameErrorMsg.textContent = '';
     }
 
-    // Address
+    // Adresse
     let regexAddress = /^[0-9a-z\sàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöü]+$/i;
     if (regexAddress.test(contact.address) === false) {
         addressErrorMsg.textContent = 'Veuillez saisir une adresse';
@@ -273,7 +273,7 @@ function validateForm(contact) {
         addressErrorMsg.textContent = '';
     }
 
-    // City
+    // Ville
     if (regexDefault.test(contact.city) === false) {
         cityErrorMsg.textContent = 'Veuillez saisir une ville';
         return false;
@@ -289,6 +289,6 @@ function validateForm(contact) {
     } else {
         emailErrorMsg.textContent = '';
     }
-    
+
     return true;
 }

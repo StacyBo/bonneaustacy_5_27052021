@@ -10,7 +10,7 @@ fetch('http://localhost:3000/api/products') // récupération des données de l'
         });
     });
 
-function displayProducts(product){
+function displayProducts(product) {
     // création des élèments pour les produits de la page d'acceuil
     let a = document.createElement('a');
     let article = document.createElement('article');
@@ -36,4 +36,3 @@ function displayProducts(product){
     img.alt = product.altTxt;
     p.innerHTML = product.description;
 }
-

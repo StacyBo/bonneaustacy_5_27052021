@@ -7,51 +7,65 @@ fetch('http://localhost:3000/api/products/' + productId)
         return response.json();
     })
     .then(function (product) {
-       displayProduct(product)
+        displayProduct(product)
     });
 
-function displayProduct (product){
-     // Display Product image
-     let img = document.createElement('img');
-     img.src = product.imageUrl;
-     img.alt = product.altTxt;
-     let itemImg = document.querySelector('.item__img');
-     itemImg.appendChild(img);
-
-     // Display Product title
-     let title = document.getElementById('title');
-     title.textContent = product.name;
-
-     // Display Product price
-     let price = document.getElementById('price');
-     price.textContent = product.price;
-
-     // Display Product description
-     let description = document.getElementById('description');
-     description.textContent = product.description;
-
-     // Display Product colors
-     let colors = document.getElementById('colors');
-     for (let color of product.colors) {
-         let option = document.createElement('option');
-         option.value = color;
-         option.textContent = color;
-         colors.appendChild(option);
-     }
+// afficher les produits
+function displayProduct(product) {
+    displayProductImage(product);
+    displayProductName(product);
+    displayProductPrice(product);
+    displayProductDescription(product);
+    displayProductColors(product);
 }
 
-// Click on "add to cart" button
+function displayProductImage(product) {
+    // Afficher l'image du produit
+    let img = document.createElement('img');
+    img.src = product.imageUrl;
+    img.alt = product.altTxt;
+    let itemImg = document.querySelector('.item__img');
+    itemImg.appendChild(img);
+}
+function displayProductName(product) {
+    // Afficher le nom du produit
+    let title = document.getElementById('title');
+    title.textContent = product.name;
+}
+function displayProductPrice(product) {
+    // Afficher le prix du produit
+    let price = document.getElementById('price');
+    price.textContent = product.price;
+
+}
+function displayProductDescription(product) {
+    // Afficher la description du produit
+    let description = document.getElementById('description');
+    description.textContent = product.description;
+}
+function displayProductColors(product) {
+    // Afficher la couleur du produit
+    let colors = document.getElementById('colors');
+    for (let color of product.colors) {
+        let option = document.createElement('option');
+        option.value = color;
+        option.textContent = color;
+        colors.appendChild(option);
+    }
+}
+
+// Cliquer sur "ajouter au panier" 
 const addToCartButton = document.getElementById('addToCart');
 
-addToCartButton.addEventListener('click', function() {
+addToCartButton.addEventListener('click', function () {
     let quantity = parseInt(document.getElementById('quantity').value);
     if (quantity < 1) {
         return;
     }
     let colorSelected = document.getElementById('colors').value;
-    if (!colorSelected){
+    if (!colorSelected) {
         return;
-    } 
+    }
 
     // On récupère les produits enregistrés dans le local storage
     let productsFromLocalStorageJSON = localStorage.getItem('products');
@@ -81,6 +95,7 @@ addToCartButton.addEventListener('click', function() {
     document.location.href = "cart.html";
 });
 
+// Ajuster les quantites de produits
 function updateProductQuantity(productsFromLocalStorage, colorSelected, quantity) {
     let productHasBeenUpdated = false;
     for (let product of productsFromLocalStorage) {

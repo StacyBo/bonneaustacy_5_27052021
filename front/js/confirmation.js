@@ -2,7 +2,12 @@ let site = document.location;
 let url = new URL(site);
 let orderId = url.searchParams.get("orderId");
 
-// Display the order identifier
-if (orderId) {
-    document.getElementById('orderId').textContent = orderId;
+
+function displayOrderIdentifier(orderId) {
+    // Afficher les numero de commande
+    if (orderId) {
+        document.getElementById('orderId').textContent = orderId;
+    }
 }
+
+displayOrderIdentifier(orderId);
